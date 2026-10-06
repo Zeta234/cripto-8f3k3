@@ -1,0 +1,280 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b0f17"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><title>CryptoAnalyzer IA</title>
+<style>
+:root{--bg:#0b0f17;--card:#141b28;--bd:#223049;--tx:#e6ecf5;--mt:#8a99b3;--g:#22c55e;--r:#ef4444;--y:#eab308;--b:#3b82f6}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,sans-serif;padding-bottom:78px}
+header{padding:12px 16px;font-weight:700;font-size:18px;position:sticky;top:0;background:var(--bg);z-index:5;border-bottom:1px solid var(--bd)}
+header small{display:block;color:var(--mt);font-weight:400;font-size:11px}
+main{padding:12px;max-width:720px;margin:auto}h3{margin:14px 0 8px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:12px}
+.card.g{border-left:5px solid var(--g)}.card.y{border-left:5px solid var(--y)}.card.r{border-left:5px solid var(--r)}
+.btn{width:100%;padding:16px;border:0;border-radius:12px;background:var(--b);color:#fff;font-size:17px;font-weight:700;margin:6px 0}
+.btn:disabled{opacity:.5}.btn.s{background:#26334d;padding:11px;font-size:14px}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#0e1420;border-top:1px solid var(--bd);z-index:9}
+nav button{flex:1;background:none;border:0;color:var(--mt);padding:7px 0 10px;font-size:10.5px}nav button b{display:block;font-size:20px;font-weight:400}nav button.on{color:var(--tx);font-weight:700}
+.row{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}.k,.note{color:var(--mt)}.note{font-size:12px}
+.L{color:var(--g)}.S{color:var(--r)}.W{color:var(--y)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.grid .card{margin:0}
+input,select{width:100%;padding:11px;border-radius:10px;border:1px solid var(--bd);background:#0e1420;color:var(--tx);font-size:15px;margin:3px 0 8px}
+.tw{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:5px 4px;border-bottom:1px solid var(--bd);text-align:right;white-space:nowrap}td:first-child,th:first-child{text-align:left}
+section{display:none}section.on{display:block}details{margin-top:6px}summary{color:var(--mt);font-size:13px}
+.bar{height:5px;background:#26334d;border-radius:4px;overflow:hidden;margin:6px 0}.bar i{display:block;height:100%;width:0;background:var(--b);transition:width .35s}@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}.card{animation:fi .3s}.btn:active{transform:scale(.98)}
+.qi{display:inline-block;width:20px;height:20px;border-radius:50%;background:#26334d;color:var(--mt);font-size:12px;font-weight:700;text-align:center;line-height:20px;margin-left:6px;vertical-align:middle;cursor:pointer}.grid .card{position:relative}.grid .qi{position:absolute;top:8px;right:8px;margin:0}
+</style></head><body>
+<header>CryptoAnalyzer IA<small>Análisis + señales + información. Sin operaciones automáticas.</small><small id="hs"></small></header>
+<main>
+<section id="s-home" class="on"><div id="cx"></div><button class="btn" id="scanBtn" onclick="scan()">🔄 ESCANEAR MERCADO</button><div class="bar"><i id="pbi"></i></div><div class="note" id="prog" style="margin-bottom:10px">Iniciando…</div><div id="home"></div></section>
+<section id="s-sig"><div id="sig"></div></section>
+<section id="s-ia"><div id="ia"></div></section>
+<section id="s-bt"><div class="card"><b>🧪 Backtesting</b>
+<label class="note">Símbolos USDT (varios separados por coma, máx. 8)</label><input id="b1" value="BTCUSDT,ETHUSDT,SOLUSDT">
+<label class="note">Timeframe de entrada (1H/4H se derivan ×4 y ×16)</label><select id="b2"><option>15m</option><option selected>1h</option><option>4h</option></select>
+<label class="note">Cantidad de velas</label><select id="b3"><option>2000</option><option selected>3000</option><option>5000</option></select>
+<label class="note">Modo de señales</label><select id="b4"><option value="cfg">El de Configuración</option><option value="strict">Estricto</option><option value="bal">Equilibrado</option><option value="flex">Flexible</option></select>
+<button class="btn" id="btBtn" onclick="runBT()">Ejecutar backtest</button><div class="note" id="btp"></div></div><div id="bt"></div></section>
+<section id="s-hist"><div id="hist"></div></section>
+<section id="s-cfg"><div class="card"><b>⚙️ Configuración — PRECISIÓN EQUILIBRADA</b><br>
+<label class="note">Volumen mínimo 24H (millones USDT)</label><input id="c1" type="number">
+<label class="note">Candidatos para análisis profundo (10–60)</label><input id="c2" type="number">
+<label class="note">Modo de sensibilidad de las señales</label><select id="c3"><option value="strict">Estricto (pocas señales, máxima exigencia)</option><option value="bal">Equilibrado (recomendado)</option><option value="flex">Flexible (más señales, menor calidad)</option></select>
+<div class="note" style="margin-bottom:8px">Compara los tres modos en 🧪 Backtesting antes de elegir: más señales no significa mejores resultados.</div>
+<label class="note">Actualización automática (minutos, 0 = apagada)</label><input id="c5" type="number">
+<label class="note">Capital para calcular posiciones (USDT, 0 = no mostrar)</label><input id="c6" type="number">
+<label class="note">Riesgo por operación (% del capital; prudente: 1–2%)</label><input id="c7" type="number" step="0.1">
+<div style="margin:8px 0;background:#0e1420;border-radius:10px;padding:10px"><b>🔔 Alertas de señal confirmada</b><div class="note" id="nst" style="margin:6px 0"></div><div class="row"><button class="btn s" style="width:auto" id="abtn" onclick="toggleAlerts()">🔔 Activar alertas</button><button class="btn s" style="width:auto" onclick="testAlert()">Probar alerta</button></div><button class="btn s" style="width:100%" id="wbtn" onclick="toggleWake()">📵 Mantener pantalla encendida: no</button></div>
+<button class="btn" onclick="saveCfg()">Guardar</button>
+<p class="note">Los umbrales no se auto-ajustan. Si los cambias, valida el efecto en Backtesting comparando TRAIN vs TEST, no solo el resultado total.</p></div>
+<div class="card note">La puntuación (0–100) representa calidad técnica según las reglas del motor y no garantiza resultados futuros. No es probabilidad de éxito. Solo datos públicos de Binance; no se piden claves ni se opera. Esto no es asesoramiento financiero.</div></section>
+</main>
+<div id="ib" onclick="this.style.display='none'" style="display:none;position:fixed;left:12px;right:12px;bottom:92px;z-index:30;background:#1d2840;border:1px solid var(--bd);border-radius:14px;padding:14px;box-shadow:0 6px 24px #000a"></div>
+<div id="cm" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:20;padding:12px;overflow:auto"><div class="row" style="align-items:center"><b id="ct"></b><button class="btn s" style="width:auto" onclick="closeChart()">✕ Cerrar</button></div><div class="row" id="ctf" style="justify-content:flex-start;margin:8px 0"></div><canvas id="cv" style="width:100%;height:360px;background:#0e1420;border-radius:12px"></canvas><div id="cinfo" class="note" style="margin-top:8px"></div><div class="note">Velas verdes/rojas · amarillo EMA20 · azul EMA50 · líneas: entrada, SL, TP1, TP2 de la señal.</div></div>
+<nav><button class="on" data-t="home" onclick="show('home')"><b>🏠</b>Inicio</button><button data-t="sig" onclick="show('sig')"><b>📈</b>Señales</button><button data-t="ia" onclick="show('ia')"><b>🧠</b>IA</button><button data-t="bt" onclick="show('bt')"><b>🧪</b>Backtest</button><button data-t="hist" onclick="show('hist')"><b>🕐</b>Historial</button><button data-t="cfg" onclick="show('cfg')"><b>⚙️</b>Config</button></nav>
+<script>
+const API='https://data-api.binance.vision',$=s=>document.querySelector(s);
+const CFG=Object.assign({vol:5,n:30,thr:76,rr:1.8,auto:3,cap:0,risk:1,mode:'bal'},(()=>{try{return JSON.parse(localStorage.getItem('ca_cfg')||'{}')}catch(e){return{}}})());
+const st={tickers:[],uni:0,res:[],reg:null,br:.5,best:null,busy:0};
+const STB=new Set(['USDC','FDUSD','TUSD','USDP','DAI','EUR','AEUR','USDE','XUSD','BUSD','PAXG']);
+const sleep=ms=>new Promise(r=>setTimeout(r,ms)),sg=x=>x>0?1:x<0?-1:0,cl=(x,a=-1,b=1)=>Math.max(a,Math.min(b,x));
+const fmt=x=>x>=100?x.toFixed(2):x>=1?x.toFixed(4):x.toPrecision(4);
+const rl=r=>r>.25?['🟢 ALCISTA','L']:r<-.25?['🔴 BAJISTA','S']:['🟡 NEUTRO','W'];
+const lab=f=>f.tr>.3?'ALCISTA':f.tr<-.3?'BAJISTA':'NEUTRO',dn=d=>d>0?'LONG':'SHORT',dc=d=>d>0?'L':'S';
+const NM={al15:'Alineación 15M',al1h:'Alineación 1H',al4h:'Alineación 4H',macd:'Momentum',rsi:'RSI',vol:'Volumen',slope:'Pendiente',str:'Estructura',rr:'R:R',reg:'Régimen',entry:'Calidad de entrada'};
+const W={al15:6,al1h:22,al4h:20,macd:9,rsi:8,vol:7,slope:6,str:6,rr:6,reg:4,entry:6};
+
+/* ===== DATOS ===== */
+const HOSTS=['https://data-api.binance.vision','https://api.binance.com','https://api1.binance.com','https://api2.binance.com','https://api3.binance.com','https://api4.binance.com'];let HI=0;
+class CE extends Error{constructor(m,c){super(m);this.code=c}}
+async function jget(p){let err=null;for(let t=0;t<HOSTS.length;t++){const k=(HI+t)%HOSTS.length,h=HOSTS[k];try{const r=await fetch(h+p);
+if(r.ok){const j=await r.json();HI=k;return j}
+if(r.status==429||r.status==418){const ra=r.headers.get('Retry-After');throw new CE(h.replace('https://','')+' → HTTP '+r.status+(ra?' (reintentar en '+ra+' s)':''),r.status)}
+err=new CE(h.replace('https://','')+' → HTTP '+r.status,r.status)}catch(e){if(e.code==429||e.code==418)throw e;err=e.code!==undefined?e:new CE(h.replace('https://','')+' → '+e.message,0)}}throw err}
+function explain(e){const c=e.code,m=e.message;let x;if(c<0)x=m;else if(c==451)x='Binance bloquea tu país o red (HTTP 451). Prueba con otra red o VPN.';else if(c==403)x='Binance rechazó la petición (HTTP 403), normalmente por restricción de red o región.';else if(c==429)x='Límite de solicitudes de Binance alcanzado (429). Espera un minuto y reintenta.';else if(c==418)x='Binance bloqueó temporalmente esta IP por exceso de solicitudes (418). Espera varios minutos.';else if(c>=500)x='Binance tiene un error de servidor ('+c+'). Reintenta en unos minutos.';else x='No se pudo conectar: sin internet, CORS, o una red/DNS que bloquea la petición.';return x+(c>=0?' Detalle: '+m:'')}
+const mapK=d=>d.map(k=>({t:k[0],o:+k[1],h:+k[2],l:+k[3],c:+k[4],v:+k[5]}));
+const kl=(s,tf)=>jget(`/api/v3/klines?symbol=${s}&interval=${tf}&limit=300`).then(d=>mapK(d).slice(0,-1)); // descarta vela abierta
+async function kback(sym,tf,n){let out=[],end='';while(out.length<n){const lim=Math.min(1000,n-out.length),d=await jget(`/api/v3/klines?symbol=${sym}&interval=${tf}&limit=${lim}${end}`);if(!d.length)break;const a=mapK(d);out=a.concat(out);end='&endTime='+(a[0].t-1);if(d.length<lim)break;await sleep(150)}return out.slice(0,-1)}
+async function pool(items,n,fn){let i=0;await Promise.all(Array.from({length:n},async()=>{while(i<items.length){const x=items[i++];try{await fn(x)}catch(e){}}}))}
+
+/* ===== INDICADORES (causales: sin look-ahead) ===== */
+function ema(a,p){const k=2/(p+1),o=[];let e=a[0];for(let i=0;i<a.length;i++){e=i?a[i]*k+e*(1-k):a[0];o.push(i<p-1?NaN:e)}return o}
+function rsi(c,p=14){const o=Array(c.length).fill(NaN);let g=0,l=0;for(let i=1;i<c.length;i++){const d=c[i]-c[i-1],u=Math.max(d,0),w=Math.max(-d,0);if(i<=p){g+=u;l+=w;if(i==p){g/=p;l/=p;o[i]=100-100/(1+g/(l||1e-9))}}else{g=(g*(p-1)+u)/p;l=(l*(p-1)+w)/p;o[i]=100-100/(1+g/(l||1e-9))}}return o}
+function atr(C,p=14){const o=Array(C.length).fill(NaN);let a=0;for(let i=1;i<C.length;i++){const t=Math.max(C[i].h-C[i].l,Math.abs(C[i].h-C[i-1].c),Math.abs(C[i].l-C[i-1].c));if(i<=p){a+=t;if(i==p){a/=p;o[i]=a}}else{a=(a*(p-1)+t)/p;o[i]=a}}return o}
+function build(C){const c=C.map(x=>x.c),e12=ema(c,12),e26=ema(c,26),m=c.map((_,i)=>e12[i]-e26[i]),s9=ema(m.map(x=>isNaN(x)?0:x),9);
+return{C,c,h:C.map(x=>x.h),l:C.map(x=>x.l),v:C.map(x=>x.v),e20:ema(c,20),e50:ema(c,50),e200:ema(c,200),rsi:rsi(c),atr:atr(C),hist:m.map((x,i)=>x-s9[i])}}
+function agg(C,f){const o=[];for(let k=0;k+f<=C.length;k+=f){const g=C.slice(k,k+f);o.push({t:g[0].t,o:g[0].o,h:Math.max(...g.map(x=>x.h)),l:Math.min(...g.map(x=>x.l)),c:g[f-1].c,v:g.reduce((s,x)=>s+x.v,0)})}return o}
+
+/* ===== ANÁLISIS POR TIMEFRAME (normalizado por ATR) ===== */
+function fr(S,i){const a=S.atr[i],c=S.c[i];if(i<30||!(a>0)||isNaN(S.e50[i])||isNaN(S.hist[i]))return null;
+const e200=S.e200[i],tr=.4*sg(S.e20[i]-S.e50[i])+.3*sg(c-S.e50[i])+.3*(isNaN(e200)?0:sg(S.e50[i]-e200));
+const mx=(x,s,e)=>Math.max(...x.slice(s,e)),mn=(x,s,e)=>Math.min(...x.slice(s,e));
+const hh=mx(S.h,i-9,i+1)>mx(S.h,i-19,i-9),hl=mn(S.l,i-9,i+1)>mn(S.l,i-19,i-9);
+let rv=0;if(i>=23){let s=0;for(let k=i-22;k<i-2;k++)s+=S.v[k];rv=(S.v[i]+S.v[i-1]+S.v[i-2])/3/(s/20||1)}
+return{tr,sl:cl((S.e20[i]-S.e20[i-5])/a/1.5),mc:cl(S.hist[i]/a*5),st:((hh?1:-1)+(hl?1:-1))/2,rsi:S.rsi[i],rv,a,c}}
+const mk=(S,i)=>({S,i,f:i>=0?fr(S,i):null});
+const al=(f,d)=>Math.max(0,d*(.6*f.tr+.2*f.sl+.2*f.st));
+const rsiS=(r,d)=>{const x=d>0?r:100-r;return x>=45&&x<=68?1:x>68?cl(1-(x-68)/10,0,1):cl((x-30)/15,0,1)};
+
+/* ===== MOTOR DE SEÑALES ===== */
+const MODES={strict:{n:'Estricto',thr:76,rr:1.8,vol:1,mom:.3,al:.45,ah:.3,oth:1,pre:62,nu:3,ex:1.5},bal:{n:'Equilibrado',thr:70,rr:1.6,vol:.8,mom:.2,al:.4,ah:.25,oth:1,pre:58,nu:2,ex:2},flex:{n:'Flexible',thr:64,rr:1.4,vol:.6,mom:.1,al:.35,ah:.2,oth:2,pre:54,nu:0,ex:2.5}};
+function evalSig(Fe,Fm,Fh,reg,sym,mode){
+if(!Fe.f||!Fm.f||!Fh.f)return null;
+const e=Fe.f,m=Fm.f,h=Fh.f,dv=.5*m.tr+.3*h.tr+.2*e.tr,d=dv>=0?1:-1,S=Fm.S,i=Fm.i,px=e.c,a=m.a;
+const sw=d>0?Math.min(...S.l.slice(i-9,i+1)):Math.max(...S.h.slice(i-9,i+1));
+const sl=d>0?Math.min(px-1.3*a,sw-.2*a):Math.max(px+1.3*a,sw+.2*a),risk=Math.abs(px-sl),capped=risk>3.5*a;
+const ext=d>0?Math.max(...S.h.slice(i-49,i+1)):Math.min(...S.l.slice(i-49,i+1));
+let room=d*(ext-px);if(room<.5*a)room=2.5*risk; // ruptura: proyección ATR
+const t2=Math.min(room,3.2*risk),t1=t2*.55,rr=t2/risk;
+const xt=d*(px-S.e20[i])/a,Ae=al(e,d),Am=al(m,d),Ah=al(h,d),rg=d*reg;
+const comp={al15:Ae,al1h:Am,al4h:Ah,macd:Math.max(0,d*(.5*m.mc+.5*e.mc)),rsi:rsiS(m.rsi,d),vol:cl((e.rv-.6)/.8,0,1),slope:Math.max(0,d*(.5*m.sl+.5*h.sl)),str:Math.max(0,d*(.5*m.st+.5*h.st)),rr:capped?0:cl((rr-1.2)/1.2,0,1),reg:rg>.25?1:Math.abs(reg)<=.25?.5:0,entry:xt<-1.5?.3:xt<=1?1:cl(1-(xt-1)/1.5,0,1)};
+let score=0;for(const k in W)score+=W[k]*comp[k];score=Math.round(score);
+const clear=Math.abs(dv)>=.2;
+const cls=(mo,nx)=>{const q=MODES[mo]||MODES.bal,ck=[['1H/4H alineadas',Am>=q.al&&Ah>=q.ah,1],['Tendencia 15M',Ae>=.25,0],['Momentum',comp.macd>=q.mom,1],['Volumen',e.rv>=q.vol,1],['Pendiente',comp.slope>=.25,0],['RSI saludable',comp.rsi>=.5,0],['R:R ≥ '+q.rr,!capped&&rr>=q.rr,1],['Régimen a favor/neutro',rg>-.25,0]];if(!nx)ck.push(['Entrada no extendida',xt<=q.ex&&comp.rsi>=.2,1]);
+const thr=q.thr+(Math.abs(reg)<=.25?q.nu:rg<-.25?10:0),key=ck.filter(x=>!x[1]&&x[2]),oth=ck.filter(x=>!x[1]&&!x[2]);let state='WAIT';
+if(clear&&!key.length&&oth.length<=q.oth&&score>=thr)state='CONF';else if(clear&&Am>=q.al&&Ah>=q.ah&&score>=q.pre&&key.length<=1)state='PRE';return{ck,thr,key,oth,state}};
+const c0=cls(mode||CFG.mode),ad=Math.round(cl(score+(rg>.25?3:rg<-.25?-12:0)+(rr>=2?2:0)-(e.rv<1?4:0)-2*(c0.key.length+c0.oth.length),0,100));
+return{sym,d,score,ad,state:c0.state,thr:c0.thr,ck:c0.ck,key:c0.key,fails:c0.key.length+c0.oth.length,cls,xt,entry:px,sl,tp1:px+d*t1,tp2:px+d*t2,rr,rsi:m.rsi,rv:e.rv,comp,dirs:[lab(e),lab(m),lab(h)]}}
+
+/* ===== ESCANEO ===== */
+async function scan(){if(st.busy)return;st.busy=1;const P=t=>$('#prog').textContent=t;$('#scanBtn').disabled=true;st.err=null;st.tryTs=Date.now();const PB=p=>{$('#pbi').style.width=p+'%'};PB(5);$('#hs').textContent='⏳ Conectando con Binance…';
+try{P('Obteniendo mercado…');PB(10);
+const[info,tk]=await Promise.all([jget('/api/v3/exchangeInfo?permissions=SPOT'),jget('/api/v3/ticker/24hr')]);
+if(!Array.isArray(tk)||!info||!info.symbols)throw new CE('Respuesta inesperada de Binance.',-1);
+const btk=tk.find(t=>t.symbol=='BTCUSDT');if(!btk||Math.abs(Date.now()-btk.closeTime)>9e5)throw new CE('Datos desactualizados o reloj del teléfono desfasado (más de 15 min de diferencia). No se generan señales.',-2);
+const ok=new Set(info.symbols.filter(s=>s.status=='TRADING'&&s.quoteAsset=='USDT').map(s=>s.symbol));
+const uni=tk.filter(t=>t.symbol.endsWith('USDT')&&ok.has(t.symbol)&&!STB.has(t.symbol.slice(0,-4))&&+t.quoteVolume>=CFG.vol*1e6&&+t.count>0&&+t.lastPrice>0);
+if(uni.length<5)throw new CE('Universo de mercado vacío o incompleto ('+uni.length+' pares).',-1);
+P('Régimen de BTC…');PB(20);
+const[b1,b4]=await Promise.all([kl('BTCUSDT','1h'),kl('BTCUSDT','4h')]);
+if(b1.length<250||b4.length<250||Date.now()-(b1[b1.length-1].t+36e5)>72e5)throw new CE('Velas de BTC incompletas o desactualizadas. No se generan señales.',-2);
+const B1=build(b1),B4=build(b4),f1=fr(B1,B1.c.length-1),f4=fr(B4,B4.c.length-1);
+if(!f1||!f4)throw new CE('Datos de BTC insuficientes para calcular el régimen.',-1);
+const cand=uni.map(t=>({s:t.symbol,k:Math.log10(+t.quoteVolume)+Math.min(Math.abs(+t.priceChangePercent),12)*.15})).sort((a,b)=>b.k-a.k).slice(0,CFG.n).map(x=>x.s);
+const data={},fails=[];let n=0,rl429=null;
+await pool(cand,4,async s=>{try{const[a,b,c]=await Promise.all([kl(s,'15m'),kl(s,'1h'),kl(s,'4h')]);if(a.length<250||b.length<250||c.length<250)throw new CE(s+': historial insuficiente',-3);data[s]=[build(a),build(b),build(c)]}catch(e){fails.push(s+': '+e.message);if(e.code==429||e.code==418)rl429=e}P(`Analizando ${++n}/${cand.length}…`);PB(20+70*n/cand.length)});
+if(rl429)throw rl429;
+if(fails.length>Math.max(2,cand.length*.2))throw new CE('Datos incompletos: '+fails.length+' de '+cand.length+' activos sin descargar ('+fails[0]+').',-4);
+const ks=Object.keys(data);let ab=0;ks.forEach(s=>{const S=data[s][1],i=S.c.length-1;if(S.c[i]>S.e50[i])ab++});
+st.br=ab/ks.length;st.reg=.35*f1.tr+.3*f4.tr+.35*(2*st.br-1);st.tickers=tk;st.uni=uni.length;
+const prev=new Set(st.res.filter(s=>s.state=='CONF').map(s=>s.sym+s.d)),had=st.ok&&!!st.ts;st.res=ks.map(s=>{const[a,b,c]=data[s];return evalSig(mk(a,a.c.length-1),mk(b,b.c.length-1),mk(c,c.c.length-1),st.reg,s)}).filter(Boolean);
+const cf=st.res.filter(s=>s.state=='CONF').sort((a,b)=>b.ad-a.ad),pr=st.res.filter(s=>s.state=='PRE').sort((a,b)=>b.ad-a.ad);
+st.best=cf[0]||pr[0]||null;st.ok=true;st.ts=Date.now();st.host=HOSTS[HI].replace('https://','');const seen=st.seen||new Set(),fresh=cf.filter(s=>addH(s)&&!seen.has(s.sym+s.d));st.seen=new Set(cf.map(s=>s.sym+s.d));st.alert=fresh.length?'🔔 Nueva señal confirmada: '+fresh.map(s=>s.sym.slice(0,-4)+' '+dn(s.d)).join(', '):null;alertSig(fresh);resolveHist(0);
+PB(100);rHome();rSig();rIA();liveTick();P('Listo: '+new Date().toLocaleTimeString()+` — ${cf.length} confirmadas, ${pr.length} pre-señales.`+(fails.length?` ${fails.length} activo(s) omitido(s) por historial insuficiente.`:''));
+}catch(e){PB(0);st.ok=false;st.res=[];st.best=null;st.tickers=[];st.uni=0;st.err=explain(e);rHome();rSig();rIA();P('Escaneo cancelado: no se generaron señales.')}
+st.busy=0;$('#scanBtn').disabled=false;renderCx()}
+const nodata=()=>`<div class="card r"><b>🔴 Error de conexión con Binance</b><div><b>⚠️ Datos de mercado no disponibles — no operar.</b></div><button class="btn" onclick="scan()">🔄 REINTENTAR CONEXIÓN</button></div>`;
+function renderCx(){let h,hs;
+if(st.err){hs='🔴 Error de conexión con Binance';h=`<div class="card r"><b>🔴 Error de conexión con Binance</b><div style="margin:6px 0">${st.err}</div><b>⚠️ Datos de mercado no disponibles — no operar.</b><button class="btn" onclick="scan()">🔄 REINTENTAR CONEXIÓN</button><div class="note" id="nx"></div></div>`}
+else if(st.ok){const a=Math.round((Date.now()-st.ts)/6e4);hs='🟢 Binance conectado'+(a>10?' · ⚠️ datos de hace '+a+' min':'');h=`<div class="card g"><b>🟢 Binance conectado</b><div class="note">Datos reales recibidos a las ${new Date(st.ts).toLocaleTimeString()} (${st.host}).</div>`+(st.alert?`<div class="L"><b>${st.alert}</b></div>`:'')+`<div class="note" id="nx"></div>`+(a>10?`<div class="W">⚠️ Datos con ${a} min de antigüedad: escanea de nuevo antes de usar las señales.</div>`:'')+`</div>`}
+else{hs='⚪ Sin conexión verificada';h=`<div class="card"><b>⚪ Sin conexión verificada</b><div class="note">Pulsa ESCANEAR MERCADO. No se muestran señales sin datos reales.</div></div>`}
+$('#cx').innerHTML=h;$('#hs').textContent=hs}
+/* ===== VISTAS ===== */
+function show(t){document.querySelectorAll('section').forEach(e=>e.classList.toggle('on',e.id=='s-'+t));document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t==t));st.tab=t;if(t=='hist'){rHist();resolveHist(0)}window.scrollTo(0,0)}
+function rHome(){if(st.err){$('#home').innerHTML='';return}const b=st.tickers.find(t=>t.symbol=='BTCUSDT'),r=st.reg!=null?rl(st.reg):['—','W'],s=st.best,nc=st.res.filter(x=>x.state=='CONF').length,np=st.res.filter(x=>x.state=='PRE').length;
+$('#home').innerHTML=`<div class="card"><div class="row"><b style="font-size:18px">BTC/USDT</b><span class="${r[1]}">Régimen ${r[0]}</span></div>`+(b?`<div style="font-size:28px;font-weight:700">$<span id="btcp">${fmt(+b.lastPrice)}</span> <span class="note">en vivo</span></div><div class="${+b.priceChangePercent>=0?'L':'S'}">${(+b.priceChangePercent).toFixed(2)}% · 24H</div>`:'<div class="k">Sin datos todavía</div>')+`</div>
+<div class="grid"><div class="card"><span class="qi" onclick="info('uni')">?</span><div class="k">Universo USDT</div><b style="font-size:22px">${st.uni}</b></div><div class="card"><span class="qi" onclick="info('deep')">?</span><div class="k">Candidatos profundos</div><b style="font-size:22px">${Math.min(CFG.n,st.uni)}</b></div><div class="card"><span class="qi" onclick="info('conf')">?</span><div class="k">🟢 Confirmadas</div><b style="font-size:22px">${nc}</b></div><div class="card"><span class="qi" onclick="info('pre')">?</span><div class="k">🟡 Pre-señales</div><b style="font-size:22px">${np}</b></div></div><h3>Mejor oportunidad</h3>`+(s?card(s):'<div class="card k">Sin oportunidades por ahora. Preferimos esperar a forzar señales mediocres.</div>')}
+function card(s){const cls=s.state=='CONF'?'g':s.state=='PRE'?'y':'r',em=s.state=='CONF'?'🟢 SEÑAL CONFIRMADA':s.state=='PRE'?'🟡 PRE-SEÑAL':'🔴 WAIT',r=rl(st.reg);
+let h=`<div class="card ${cls}"><div class="row"><b>${em}</b><b class="${dc(s.d)}">${dn(s.d)}</b></div><div style="font-size:18px;font-weight:700">${s.sym.slice(0,-4)}/USDT</div><div>Puntuación de calidad: <b>${s.score}/100</b> <span class="note">(adaptativa ${s.ad})</span></div><div class="note">Ahora: <b class="lp" data-s="${s.sym}">…</b> <span class="ld" data-s="${s.sym}"></span></div>`;
+if(s.state=='CONF')h+=`<div class="row"><span>Entrada <b>$${fmt(s.entry)}</b></span><span>SL <b class="S">$${fmt(s.sl)}</b></span></div><div class="row"><span>TP1 <b class="L">$${fmt(s.tp1)}</b></span><span>TP2 <b class="L">$${fmt(s.tp2)}</b></span></div><div class="row"><span>R:R <b>1:${s.rr.toFixed(1)}</b></span><span>RSI <b>${s.rsi.toFixed(0)}</b></span><span>Vol rel. <b>${s.rv.toFixed(2)}x</b></span></div><div class="note">Régimen ${r[0]} · 15M ${s.dirs[0]} · 1H ${s.dirs[1]} · 4H ${s.dirs[2]}</div><div class="note">📍 Entrada a ${s.xt.toFixed(1)} ATR de la EMA20 1H (${s.xt<=1?'cerca, buena':'algo extendida'})</div>`+sizing(s);
+else{h+=`<div style="margin:6px 0">`+s.ck.map(c=>`${c[1]?'✅':'❌'} ${c[0]}<br>`).join('')+`</div>`;
+h+=s.state=='PRE'?`<b class="W">PRE-SEÑAL — esperando: ${s.key.map(x=>x[0]).join(', ')||'puntuación ≥ '+s.thr}</b><div class="note">NO recomendar entrar.</div>`:`<b>Resultado: No operar.</b>`}
+return h+`<button class="btn s" style="width:100%" onclick="openChart('${s.sym}')">📊 Ver gráfico en vivo</button></div>`}
+function sizing(s){const cap=CFG.cap;if(!(cap>0))return'<div class="note" style="margin-top:6px">💡 Pon tu capital en ⚙️ Config para ver el tamaño de la posición.</div>';
+const rk=Math.abs(s.entry-s.sl);let q=cap*CFG.risk/100/rk,lim=0;if(q*s.entry>cap){q=cap/s.entry;lim=1}
+const f=v=>v>=1000?v.toFixed(0):v>=1?v.toFixed(2):v.toPrecision(3);
+return `<div style="margin-top:8px;background:#0e1420;border-radius:10px;padding:10px"><b>🧮 Tamaño de posición</b> <span class="note">(riesgo ${CFG.risk}% de $${f(cap)})</span><div>Cantidad: <b>${q>=1?q.toFixed(2):q.toPrecision(3)}</b> ${s.sym.slice(0,-4)} (≈ $${f(q*s.entry)})</div><div>Pérdida si toca SL: <b class="S">−$${f(q*rk)}</b> (${(q*rk/cap*100).toFixed(2)}% del capital) · SL a ${(rk/s.entry*100).toFixed(2)}%</div><div>Ganancia en TP1: <b class="L">+$${f(q*Math.abs(s.tp1-s.entry))}</b> · TP2: <b class="L">+$${f(q*Math.abs(s.tp2-s.entry))}</b></div>`+(lim?'<div class="W">⚠️ Limitado a tu capital (sin apalancamiento): el riesgo real es menor al elegido.</div>':'')+`<div class="note">No incluye comisiones ni el lote mínimo de Binance.${s.d<0?' SHORT requiere margen/futuros; en SPOT no se puede vender en corto.':''}</div></div>`}
+function bott(R){const bn={};R.forEach(s=>s.ck.forEach(c=>{if(!c[1])bn[c[0]]=(bn[c[0]]||0)+1}));const top=Object.entries(bn).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k,v])=>`${k} (${v}/${R.length})`).join(', ');return `<div class="card"><b>Modo: ${(MODES[CFG.mode]||MODES.bal).n}</b><div class="note">Mejor puntuación hoy: ${Math.max(...R.map(s=>s.score))}/100. Filtros que más descartan: ${top||'ninguno'}. Cambia el modo en ⚙️ Config.</div></div>`}
+function rSig(){const R=st.res,C=R.filter(s=>s.state=='CONF').sort((a,b)=>b.score-a.score),P=R.filter(s=>s.state=='PRE').sort((a,b)=>b.score-a.score),Wt=R.filter(s=>s.state=='WAIT').sort((a,b)=>b.score-a.score);
+if(st.err){$('#sig').innerHTML=nodata();return}if(!R.length){$('#sig').innerHTML='<div class="card">Escanea el mercado primero.</div>';return}
+const best=C.slice().sort((a,b)=>b.ad-a.ad)[0];
+let h=bott(R)+'<h3>MEJOR OPORTUNIDAD</h3>'+(best?card(best):'<div class="card k">Ninguna señal confirmada.</div>')+`<h3>SEÑALES CONFIRMADAS (${C.length}) <span class="qi" onclick="info('conf')">?</span></h3>`;
+h+=C.length?`<div class="card">`+C.map((s,i)=>`${i+1}. ${s.d>0?'🟢':'🔴'} ${s.sym.slice(0,-4)}/USDT — ${dn(s.d)} — ${s.score}/100<br>`).join('')+`</div>`+C.map(card).join(''):'<div class="card k">Ninguna.</div>';
+h+=`<h3>PRE-SEÑALES (${P.length}) <span class="qi" onclick="info('pre')">?</span></h3>`+(P.map(card).join('')||'<div class="card k">Ninguna.</div>');
+h+=`<h3>DIAGNÓSTICO — WAIT (${Wt.length}) <span class="qi" onclick="info('wait')">?</span></h3>`+Wt.map(s=>`<div class="card r"><div class="row"><b>${s.sym.slice(0,-4)}/USDT — WAIT</b><span class="${dc(s.d)}">${dn(s.d)} · ${s.score}</span></div><details><summary>Ver motivos</summary>${s.ck.map(c=>`${c[1]?'✅':'❌'} ${c[0]}<br>`).join('')}<b>No operar.</b></details></div>`).join('');
+$('#sig').innerHTML=h}
+function rIA(){const R=st.res;if(st.err){$('#ia').innerHTML=nodata();return}if(!R.length){$('#ia').innerHTML='<div class="card">Escanea el mercado primero.</div>';return}
+const C=R.filter(s=>s.state=='CONF').sort((a,b)=>b.ad-a.ad),P=R.filter(s=>s.state=='PRE').sort((a,b)=>b.ad-a.ad),r=rl(st.reg),best=C[0]||P[0],gr=s=>s.ad>=88&&!s.fails?'A':s.ad>=80?'B':'C';
+let h=`<div class="card"><b>🧠 IA</b><div class="note">Motor de análisis cuantitativo + capa inteligente adaptativa (reglas y puntuaciones; no es Machine Learning).</div></div>`;
+h+=`<div class="card"><b>Régimen: ${r[0]}</b><br>Índice ${st.reg.toFixed(2)} · ${(st.br*100).toFixed(0)}% de candidatos sobre EMA50 1H. ${st.reg>.25?'Se favorece LONG; SHORT exige un umbral +10.':st.reg<-.25?'Se favorece SHORT; LONG exige un umbral +10.':'Mercado sin dirección: '+(MODES[CFG.mode].nu?'las señales exigen +'+MODES[CFG.mode].nu+' puntos.':'sin exigencia extra en este modo.')}</div>`;
+if(best){const top=Object.keys(W).sort((a,b)=>W[b]*best.comp[b]-W[a]*best.comp[a]).slice(0,3).map(k=>NM[k]).join(', '),weak=Object.keys(W).sort((a,b)=>best.comp[a]-best.comp[b])[0];
+h+=`<div class="card g"><b>Mejor: ${best.sym.slice(0,-4)} ${dn(best.d)} (${best.state=='CONF'?'confirmada':'pre-señal'})</b><br>Adaptativa ${best.ad}. Destaca por: ${top}. Punto más débil: ${NM[weak]}. R:R 1:${best.rr.toFixed(1)}.</div>`}else h+=`<div class="card">Sin señales ni pre-señales. Esperar es una decisión válida: se prioriza calidad sobre cantidad.</div>`;
+const L=[...C,...P];if(L.length)h+=`<div class="card tw"><b>Comparativa</b><table><tr><th>Activo</th><th>Estado</th><th>Punt.</th><th>Adapt.</th><th>Clase</th></tr>`+L.map(s=>`<tr><td>${s.sym.slice(0,-4)} <span class="${dc(s.d)}">${dn(s.d)}</span></td><td>${s.state=='CONF'?'🟢':'🟡'}</td><td>${s.score}</td><td>${s.ad}</td><td>${gr(s)}</td></tr>`).join('')+`</table></div>`;
+const rk=[],ct=[];L.forEach(s=>{if(s.d*st.reg<-.25)rk.push(`${s.sym.slice(0,-4)}: va contra el régimen.`);if(s.rsi>70||s.rsi<30)rk.push(`${s.sym.slice(0,-4)}: RSI extremo (${s.rsi.toFixed(0)}).`);if(s.dirs[0]!=s.dirs[2])ct.push(`${s.sym.slice(0,-4)}: 15M ${s.dirs[0]} vs 4H ${s.dirs[2]}.`);if(s.fails)ct.push(`${s.sym.slice(0,-4)}: falla ${s.ck.filter(c=>!c[1]).map(c=>c[0]).join(', ')}.`)});
+if(C.filter(s=>s.d>0).length>2||C.filter(s=>s.d<0).length>2)rk.push('Varias señales en la misma dirección: están correlacionadas, no sumes riesgo como si fueran independientes.');
+h+=`<div class="card"><b>Riesgos</b><br>${rk.join('<br>')||'Sin riesgos destacados adicionales.'}</div><div class="card"><b>Contradicciones</b><br>${ct.join('<br>')||'Ninguna relevante.'}</div><div class="card note">Clase A: adaptativa ≥88 sin fallos · B: ≥80 · C: resto. La puntuación mide calidad técnica, no probabilidad, y no garantiza resultados futuros.</div>`;
+$('#ia').innerHTML=h}
+
+/* ===== HISTORIAL (localStorage) ===== */
+const hist=()=>{try{return JSON.parse(localStorage.getItem('ca_hist')||'[]')}catch(e){return[]}},sv=h=>{try{localStorage.setItem('ca_hist',JSON.stringify(h))}catch(e){}};
+function addH(s){const h=hist();if(h.some(x=>x.sym==s.sym&&x.d==s.d&&Date.now()-x.ts<144e5))return false;h.unshift({ts:Date.now(),sym:s.sym,d:s.d,e:s.entry,sl:s.sl,t1:s.tp1,t2:s.tp2,sc:s.score,res:'Pendiente',fin:false});sv(h.slice(0,300));return true}
+function setRes(i,v){const h=hist();h[i].res=v;h[i].fin=true;sv(h);rHist()}
+function evalH(x,C,now){const d=x.d;let t1=false;for(const k of C){const hs=d>0?k.l<=x.sl:k.h>=x.sl,h1=d>0?k.h>=x.t1:k.l<=x.t1,h2=d>0?k.h>=x.t2:k.l<=x.t2;
+if(!t1){if(hs)return{res:'SL',fin:true};if(h2)return{res:'TP2',fin:true};if(h1)t1=true}else{if(h2)return{res:'TP2',fin:true};if(hs)return{res:'TP1',fin:true}}}
+const old=now-x.ts>72*36e5;return t1?{res:'TP1',fin:old}:old?{res:'Expirada',fin:true}:{res:'Pendiente',fin:false}}
+async function resolveHist(manual){const h=hist(),now=Date.now(),todo=h.filter(x=>!x.fin).slice(0,30);if(!todo.length){if(manual)rHist();return}
+let ch=0;await pool(todo,3,async x=>{const t0=x.ts-x.ts%9e5+9e5,C=mapK(await jget(`/api/v3/klines?symbol=${x.sym}&interval=15m&startTime=${t0}&limit=1000`)).filter(k=>k.t+9e5<=now),r=evalH(x,C,now);if(r.res!=x.res||r.fin!=x.fin){x.res=r.res;x.fin=r.fin;ch++}});
+if(ch)sv(h);if(manual||st.tab=='hist')rHist()}
+function histR(x){const r=Math.abs(x.e-x.sl)||1;return x.res=='SL'?-1:x.res=='TP2'?Math.abs(x.t2-x.e)/r:x.res=='TP1'?Math.abs(x.t1-x.e)/r:null}
+function rHist(){const h=hist(),T=h.map(x=>({R:histR(x),d:x.d,score:x.sc})).filter(t=>t.R!==null);
+$('#hist').innerHTML=`<div class="card"><b>🕐 Historial</b> <span class="note">(solo en este dispositivo)</span><div class="note" style="margin:6px 0">Los resultados se calculan solos con velas de 15m posteriores a cada señal. Se asume entrada al precio de la señal; si SL y TP caen en la misma vela cuenta SL. TP1 = R parcial, TP2 = R completo. Sin comisiones.</div><div class="row"><button class="btn s" style="width:auto" onclick="resolveHist(1)">🔄 Actualizar resultados</button><button class="btn s" style="width:auto" onclick="if(confirm('¿Borrar historial?')){sv([]);rHist()}">Borrar</button></div></div>`
++(T.length?`<div class="card tw"><b>Resultados reales de tus señales</b><table>${HD}${row('Todas',T)}${BK.map(b=>row(b[0],T.filter(t=>t.score>=b[1]&&t.score<b[2]))).join('')}</table>${T.length<30?'<div class="note">⚠️ Menos de 30 señales resueltas: todavía poco concluyente.</div>':''}</div>`:'<div class="card note">Aún no hay señales resueltas.</div>')
++(h.map((x,i)=>{const R=histR(x);return `<div class="card ${x.d>0?'g':'r'}"><div class="row"><b>${x.sym.slice(0,-4)} <span class="${dc(x.d)}">${dn(x.d)}</span></b><span>${x.sc}/100</span></div><div class="note">${new Date(x.ts).toLocaleString()}</div>E $${fmt(x.e)} · SL $${fmt(x.sl)}<br>TP1 $${fmt(x.t1)} · TP2 $${fmt(x.t2)}<div style="margin-top:4px"><b>${x.res}${R!==null?' · '+(R>0?'+':'')+R.toFixed(2)+'R':''}</b></div><select onchange="setRes(${i},this.value)">${['Pendiente','TP1','TP2','SL','Expirada','Cancelada'].map(o=>`<option${o==x.res?' selected':''}>${o}</option>`).join('')}</select></div>`}).join('')||'<div class="card k">Aún no hay señales guardadas.</div>')}
+
+/* ===== BACKTESTING ===== */
+function stats(T){const n=T.length;if(!n)return{n:0};const w=T.filter(t=>t.R>0),gw=w.reduce((s,t)=>s+t.R,0),gl=-T.filter(t=>t.R<=0).reduce((s,t)=>s+t.R,0);let c=0,pk=0,dd=0;T.forEach(t=>{c+=t.R;pk=Math.max(pk,c);dd=Math.max(dd,pk-c)});return{n,wr:w.length/n*100,net:c,pf:gl?gw/gl:gw?Infinity:0,exp:c/n,gw,gl,dd,L:T.filter(t=>t.d>0).length,S:T.filter(t=>t.d<0).length}}
+const row=(nm,T)=>{const s=stats(T);return s.n?`<tr><td>${nm}</td><td>${s.n}</td><td>${s.wr.toFixed(0)}%</td><td>${s.net.toFixed(1)}</td><td>${s.pf==Infinity?'∞':s.pf.toFixed(2)}</td><td>${s.exp.toFixed(2)}</td></tr>`:`<tr><td>${nm}</td><td>0</td><td colspan="4" class="note">sin muestras</td></tr>`};
+const HD='<tr><th></th><th>N</th><th>WR</th><th>Net R</th><th>PF</th><th>Exp</th></tr>',BK=[['90–100',90,101],['85–89',85,90],['80–84',80,85],['75–79',75,80],['<75',0,75]];
+function simT(C,SG,mo,nx){const tt=[];
+for(let i=800;i<C.length-2;i++){const sig=SG[i];if(!sig||sig.cls(mo,nx).state!='CONF')continue;
+const d=sig.d,ent=C[i+1].o,risk=d*(ent-sig.sl);if(risk<=0||d*(sig.tp2-ent)<=0)continue; // entra en la apertura siguiente
+let R=null,j=i+1;for(;j<Math.min(C.length,i+121);j++){const x=C[j],hs=d>0?x.l<=sig.sl:x.h>=sig.sl,ht=d>0?x.h>=sig.tp2:x.l<=sig.tp2;if(hs){R=-1;break}if(ht){R=d*(sig.tp2-ent)/risk;break}}
+if(R===null)R=d*(C[Math.min(j,C.length-1)].c-ent)/risk;tt.push({f:(i-800)/(C.length-800),d,score:sig.score,R,sym});i=j}
+return tt}
+async function runBT(){const syms=[...new Set($('#b1').value.toUpperCase().split(/[\s,;]+/).filter(Boolean))].slice(0,8),tf=$('#b2').value,N=+$('#b3').value,main=$('#b4').value=='cfg'?CFG.mode:$('#b4').value,P=t=>$('#btp').textContent=t,MK=['strict','bal','flex'];$('#btBtn').disabled=true;
+try{if(!syms.length)throw new Error('escribe al menos un símbolo');const TM={strict:[],bal:[],flex:[]},TX=[],per=[],skip=[];
+for(let q=0;q<syms.length;q++){const sym=syms[q],pf=`(${q+1}/${syms.length}) ${sym}: `;P(pf+'descargando historial…');let C;
+try{C=await kback(sym,tf,N)}catch(e){skip.push(sym+' — '+(e.code!==undefined?explain(e):e.message));continue}
+if(C.length<1000){skip.push(sym+' — historial insuficiente ('+C.length+' velas)');continue}
+P(pf+'simulando…');await sleep(30);const B=build(C),M=build(agg(C,4)),H=build(agg(C,16)),SG=[];
+for(let i=800;i<C.length-2;i++)SG[i]=evalSig(mk(B,i),mk(M,Math.floor((i+1)/4)-1),mk(H,Math.floor((i+1)/16)-1),0,sym,main);
+for(const mo of MK){const tt=simT(C,SG,mo,0);TM[mo].push(...tt);if(mo==main)per.push([sym,tt])}TX.push(...simT(C,SG,main,1))}
+if(!per.length)throw new Error('no se pudo descargar ningún símbolo. '+skip.join('; '));
+const T=TM[main],s=stats(T),tr=T.filter(t=>t.f<.7),te=T.filter(t=>t.f>=.7),a=stats(tr),b=stats(te);
+let h=`<div class="card"><b>Modo ${MODES[main].n} · ${per.length} símbolo(s) · ${tf} · hasta ${N} velas c/u</b><br>`+(s.n?`Operaciones ${s.n} (LONG ${s.L} / SHORT ${s.S})<br>Win Rate ${s.wr.toFixed(1)}% · Net R ${s.net.toFixed(1)} · PF ${s.pf==Infinity?'∞':s.pf.toFixed(2)}<br>Expectancy / R medio ${s.exp.toFixed(2)} · Ganancias ${s.gw.toFixed(1)}R · Pérdidas ${s.gl.toFixed(1)}R · Max DD ${s.dd.toFixed(1)}R`+(s.n<30?'<div class="W">⚠️ Menos de 30 operaciones: resultado poco concluyente. Añade símbolos o más velas.</div>':''):'Sin operaciones con estas reglas en el periodo.')+(skip.length?`<div class="note">Omitidos: ${skip.join('; ')}</div>`:'')+`</div>`;
+h+=`<div class="card tw"><b>Comparación de modos</b><table>${HD}${MK.map(m=>row(MODES[m].n,TM[m])).join('')}</table><div class="note">Elige el modo con expectativa positiva <b>también en TEST</b>, no solo el que da más operaciones.</div></div>`;
+h+=`<div class="card tw"><b>Filtro “entrada no extendida” (modo ${MODES[main].n})</b><table>${HD}${row('Sin filtro · todo',TX)}${row('Con filtro · todo',T)}${row('Sin filtro · TEST',TX.filter(t=>t.f>=.7))}${row('Con filtro · TEST',te)}</table><div class="note">Evita entrar persiguiendo un movimiento ya extendido. Úsalo como válido solo si mejora también en TEST.</div></div>`;
+if(a.n>=10&&b.n>=10)h+=`<div class="card ${b.exp>0?'g':'r'}">${b.exp>0?'✅ TEST mantiene expectativa positiva ('+b.exp.toFixed(2)+'R) frente a TRAIN ('+a.exp.toFixed(2)+'R). No garantiza el futuro.':'⚠️ En TEST la expectativa no es positiva ('+b.exp.toFixed(2)+'R; TRAIN '+a.exp.toFixed(2)+'R): posible sobreajuste. No confíes en estos umbrales.'}</div>`;
+h+=`<div class="card tw"><b>Por símbolo</b><table>${HD}${per.map(p=>row(p[0].slice(0,-4),p[1])).join('')}</table></div>`;
+h+=`<div class="card tw"><b>Fuera de muestra (70% / 30% de cada símbolo)</b><table>${HD}${row('TRAIN 70%',tr)}${row('TEST 30%',te)}</table><div class="note">Si TEST es mucho peor que TRAIN, las reglas no generalizan.</div></div>`;
+h+=`<div class="card tw"><b>Walk-forward (4 tramos)</b><table>${HD}${[0,1,2,3].map(k=>row('Tramo '+(k+1),T.filter(t=>t.f>=k/4&&t.f<(k+1)/4))).join('')}</table></div>`;
+h+=`<div class="card tw"><b>Calibración por puntuación</b><table>${HD}${BK.map(b=>row(b[0],T.filter(t=>t.score>=b[1]&&t.score<b[2]))).join('')}</table></div><div class="card note">Sin look-ahead: indicadores causales, velas superiores solo completas, entrada en la apertura siguiente, SL antes que TP si ambos caen en la misma vela, salida por tiempo a 120 velas. Sin comisiones. Régimen neutro (sin BTC/amplitud). 1H/4H se derivan agregando velas, por lo que son aproximados. Resultados pasados no garantizan resultados futuros.</div>`;
+$('#bt').innerHTML=h;P('Listo.')}catch(e){P('Error: '+(e.code!==undefined?explain(e):e.message))}$('#btBtn').disabled=false}
+
+/* ===== GRÁFICO EN VIVO (consulta pública cada 5 s) ===== */
+const CH={sym:null,tf:'1h',sig:null,timer:null};
+function ctfR(){$('#ctf').innerHTML=['15m','1h','4h'].map(t=>`<button class="btn s" style="width:auto;${t==CH.tf?'background:var(--b)':''}" onclick="CH.tf='${t}';ctfR();loadChart()">${t}</button>`).join('')}
+function openChart(sym){CH.sym=sym;CH.sig=st.res.find(x=>x.sym==sym)||null;$('#ct').textContent=sym.slice(0,-4)+'/USDT'+(CH.sig?' · '+dn(CH.sig.d):'');$('#cm').style.display='block';ctfR();loadChart();clearInterval(CH.timer);CH.timer=setInterval(loadChart,5000)}
+function closeChart(){clearInterval(CH.timer);$('#cm').style.display='none'}
+async function loadChart(){const sym=CH.sym,tf=CH.tf;try{const C=mapK(await jget(`/api/v3/klines?symbol=${sym}&interval=${tf}&limit=120`));if(sym!=CH.sym||tf!=CH.tf)return;drawChart(C);$('#cinfo').textContent='🟢 En vivo · actualizado '+new Date().toLocaleTimeString()+' · la señal solo se recalcula al escanear.'}catch(e){const cv=$('#cv');cv.width=cv.width;$('#cinfo').textContent='🔴 Error de conexión con Binance: '+explain(e)+' — gráfico detenido, no operar.'}}
+function drawChart(C){const cv=$('#cv'),dp=devicePixelRatio||1,w=cv.clientWidth,h=cv.clientHeight;cv.width=w*dp;cv.height=h*dp;const x=cv.getContext('2d');x.scale(dp,dp);
+const c=C.map(k=>k.c),e20=ema(c,20),e50=ema(c,50),n=80,o=C.length-n,V=C.slice(o),sig=CH.sig,lv=sig?[sig.entry,sig.sl,sig.tp1,sig.tp2]:[];
+let hi=Math.max(...V.map(k=>k.h),...lv),lo=Math.min(...V.map(k=>k.l),...lv);const pd=(hi-lo)*.06;hi+=pd;lo-=pd;
+const pr=64,cw=(w-pr)/n,X=i=>(i+.5)*cw,Y=v=>h-(v-lo)/(hi-lo)*h;x.font='11px system-ui';
+V.forEach((k,i)=>{const up=k.c>=k.o;x.strokeStyle=x.fillStyle=up?'#22c55e':'#ef4444';x.beginPath();x.moveTo(X(i),Y(k.h));x.lineTo(X(i),Y(k.l));x.stroke();const t=Y(Math.max(k.o,k.c)),b=Math.max(1,Math.abs(Y(k.o)-Y(k.c)));x.fillRect(X(i)-cw*.35,t,cw*.7,b)});
+[[e20,'#eab308'],[e50,'#3b82f6']].forEach(([e,col])=>{x.strokeStyle=col;x.lineWidth=1.5;x.beginPath();let st0=0;V.forEach((_,i)=>{const v=e[o+i];if(isNaN(v))return;st0?x.lineTo(X(i),Y(v)):x.moveTo(X(i),Y(v));st0=1});x.stroke()});x.lineWidth=1;
+const L=(v,col,t,dash)=>{if(v<lo||v>hi)return;x.strokeStyle=x.fillStyle=col;x.setLineDash(dash?[6,4]:[]);x.beginPath();x.moveTo(0,Y(v));x.lineTo(w-pr,Y(v));x.stroke();x.setLineDash([]);x.fillText(t+' '+fmt(v),w-pr+3,Y(v)+4)};
+if(sig){L(sig.entry,'#e6ecf5','E',1);L(sig.sl,'#ef4444','SL',1);L(sig.tp1,'#22c55e','TP1',1);L(sig.tp2,'#22c55e','TP2',1)}
+L(V[n-1].c,'#8a99b3','Precio',0)}
+/* ===== DINAMISMO: precios en vivo, auto-escaneo, cuenta atrás ===== */
+st.live={};
+function updLive(){const b=st.live.BTCUSDT;if(b&&$('#btcp'))$('#btcp').textContent=fmt(b);
+document.querySelectorAll('.lp').forEach(e=>{const k=e.dataset.s,p=st.live[k],s=st.res.find(x=>x.sym==k),d=document.querySelector('.ld[data-s="'+k+'"]');if(!p||!s)return;e.textContent='$'+fmt(p);const r=Math.abs(s.entry-s.sl),R=s.d*(p-s.entry)/r,pc=s.d*(p/s.entry-1)*100;let t=(pc>=0?'+':'')+pc.toFixed(2)+'% · '+R.toFixed(2)+'R';if(s.d*(p-s.sl)<=0)t='🛑 SL tocado — señal invalidada';else if(s.d*(p-s.tp2)>=0)t='🎯 TP2 alcanzado';else if(s.d*(p-s.tp1)>=0)t='🎯 TP1 alcanzado';else if(Math.abs(R)>.4)t+=' · ⚠️ lejos de la entrada';if(d){d.textContent=t;d.className='ld '+(R>=0?'L':'S')}})}
+let liveBusy=0;
+async function liveTick(){if(liveBusy||!st.ok||document.hidden)return;liveBusy=1;try{const l=[...new Set(['BTCUSDT',...st.res.filter(s=>s.state!='WAIT').map(s=>s.sym)])],r=await jget('/api/v3/ticker/price?symbols='+encodeURIComponent(JSON.stringify(l)));r.forEach(x=>st.live[x.symbol]=+x.price);updLive()}catch(e){document.querySelectorAll('.lp').forEach(x=>x.textContent='🔴 sin precio en vivo')}liveBusy=0}
+let tk0=0;
+function tick(){tk0++;const a=CFG.auto,nx=$('#nx');
+if(nx){if(st.busy)nx.textContent='';else if(a>0){const l=Math.max(0,Math.round(((st.tryTs||0)+a*6e4-Date.now())/1e3));nx.textContent='⏱ Próxima actualización en '+Math.floor(l/60)+':'+String(l%60).padStart(2,'0')}else nx.textContent='Actualización automática apagada (Config)'}
+if(a>0&&!st.busy&&!document.hidden&&Date.now()-(st.tryTs||0)>=a*6e4)scan();
+if(tk0%5==0)liveTick();if(tk0%30==0)renderCx()}
+const INFO={uni:['Universo USDT','Pares USDT activos con volumen suficiente que se revisaron primero.'],deep:['Candidatos profundos','Los mejores del universo, analizados a fondo en 15M, 1H y 4H.'],conf:['Confirmadas','Cumplen las condiciones clave del motor (1H/4H alineadas, momentum, volumen y R:R). Se pueden considerar. La puntuación es calidad técnica, no probabilidad.'],pre:['Pre-señales','Dirección clara y buena estructura, pero falta una confirmación (marcada con ❌). No son señales de entrada: no entrar todavía.'],wait:['WAIT','Configuraciones descartadas. Toca “Ver motivos” en cada tarjeta para saber por qué no se opera.']};
+function info(k){const i=INFO[k],b=$('#ib');b.innerHTML='<b>'+i[0]+'</b><div style="margin:4px 0">'+i[1]+'</div><div class="note">Toca para cerrar</div>';b.style.display='block'}
+/* ===== ALERTAS (sin servidor: solo con la app abierta) ===== */
+const persist=()=>{try{localStorage.setItem('ca_cfg',JSON.stringify(CFG))}catch(e){}};
+let ACX=null;
+function beep(){try{ACX=ACX||new(window.AudioContext||window.webkitAudioContext)();if(ACX.state=='suspended')ACX.resume();[880,1175].forEach((f,k)=>{const o=ACX.createOscillator(),g=ACX.createGain(),t=ACX.currentTime+k*.18;o.frequency.value=f;o.connect(g);g.connect(ACX.destination);g.gain.setValueAtTime(.15,t);g.gain.exponentialRampToValueAtTime(.001,t+.16);o.start(t);o.stop(t+.17)})}catch(e){}}
+async function sysNote(title,body,tag){try{if(!('Notification' in window)||Notification.permission!='granted')return false;const o={body,icon:'./icon-192.png',badge:'./icon-192.png',tag,vibrate:[200,100,200]};let reg=null;try{reg=await navigator.serviceWorker.getRegistration()}catch(e){}if(reg&&reg.showNotification){await reg.showNotification(title,o);return true}new Notification(title,o);return true}catch(e){return false}}
+async function alertSig(list){if(!CFG.alerts||!list.length)return;beep();try{navigator.vibrate([200,100,200])}catch(e){}
+for(const s of list.slice(0,3))await sysNote(`🟢 Señal confirmada: ${s.sym.slice(0,-4)} ${dn(s.d)} (${s.score}/100)`,`Entrada $${fmt(s.entry)} · SL $${fmt(s.sl)} · TP1 $${fmt(s.tp1)} · R:R 1:${s.rr.toFixed(1)}. Calidad técnica, no garantía de resultado.`,'sig-'+s.sym+s.d);
+if(list.length>3)await sysNote('🟢 Más señales confirmadas','+'+(list.length-3)+' señales más. Abre la app para verlas todas.','sig-more')}
+function alertStatus(){const n='Notification' in window?Notification.permission:'na',https=location.protocol=='https:';
+$('#abtn').textContent=CFG.alerts?'🔕 Desactivar alertas':'🔔 Activar alertas';$('#wbtn').textContent='📵 Mantener pantalla encendida: '+(CFG.wake?'sí':'no');
+$('#nst').innerHTML=(CFG.alerts?'✅ Alertas activas (banner, sonido y vibración).':'Alertas desactivadas.')+'<br>Aviso del sistema: '+(!https?'⚠️ solo disponible en la app instalada (https), no en el archivo local':n=='na'?'no compatible con este navegador':n=='granted'?'✅ permitido':n=='denied'?'🚫 bloqueado (actívalo en Ajustes del sitio de Chrome)':'⏳ falta aceptar el permiso')+'<br>Solo avisa mientras la app esté abierta; Android puede suspenderla en segundo plano o con la pantalla apagada.'}
+async function askPerm(){try{if('Notification' in window&&Notification.permission=='default')await Notification.requestPermission()}catch(e){}}
+async function toggleAlerts(){CFG.alerts=!CFG.alerts;persist();if(CFG.alerts){beep();await askPerm()}alertStatus()}
+async function testAlert(){beep();await askPerm();const w=CFG.alerts;CFG.alerts=true;await alertSig([{sym:'PRUEBAUSDT',d:1,score:90,entry:100,sl:98,tp1:103,rr:2}]);CFG.alerts=w;alertStatus()}
+let WL=null;
+async function wake(){try{if(CFG.wake&&'wakeLock' in navigator&&!document.hidden){if(!WL||WL.released)WL=await navigator.wakeLock.request('screen')}else if(WL){await WL.release();WL=null}}catch(e){}}
+async function toggleWake(){CFG.wake=!CFG.wake;persist();await wake();alertStatus()}
+document.addEventListener('visibilitychange',wake);
+function saveCfg(){CFG.vol=Math.max(0,+$('#c1').value);CFG.n=cl(+$('#c2').value||30,10,60);CFG.mode=$('#c3').value;{const a=Math.round(+$('#c5').value||0);CFG.auto=a>0?cl(a,1,60):0}CFG.cap=Math.max(0,+$('#c6').value||0);CFG.risk=cl(+$('#c7').value||1,.1,10);try{localStorage.setItem('ca_cfg',JSON.stringify(CFG))}catch(e){}alert('Guardado');if(!st.busy)scan()}
+$('#c1').value=CFG.vol;$('#c2').value=CFG.n;$('#c3').value=CFG.mode;$('#c5').value=CFG.auto;$('#c6').value=CFG.cap;$('#c7').value=CFG.risk;rHome();renderCx();alertStatus();wake();setInterval(tick,1000);scan();
+/* PWA: solo cuando se sirve por https (no en archivo local ni en APK) */
+try{if('serviceWorker' in navigator&&location.protocol=='https:')navigator.serviceWorker.register('sw.js')}catch(e){}
+</script></body></html>
